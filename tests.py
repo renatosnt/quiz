@@ -125,3 +125,39 @@ def test_invalid_choice_removal_due_to_empty_choice_list():
     
     with pytest.raises(Exception):
         question.remove_choice_by_id('non_existing_id')
+
+@pytest.fixture
+def question_with_choices():
+    question = Question(title="Qual é a capital da França?", points=5, max_selections=2)
+    question.add_choice("Paris", True)
+    question.add_choice("Londres", False)
+    question.add_choice("Berlim", False)
+    question.add_choice("Madri", False)
+    return question
+
+# Teste 1: Verificando a Adição de Escolhas
+def test_add_choices(question_with_choices):
+    # A fixture já cria uma questão com 4 opções
+    assert len(question_with_choices.choices) == 4
+    assert question_with_choices.choices[0].text == "Paris"
+    assert question_with_choices.choices[1].text == "Londres"
+    assert question_with_choices.choices[2].text == "Berlim"
+    assert question_with_choices.choices[3].text == "Madri"
+    assert question_with_choices.choices[0].is_correct is True  # A primeira opção é correta
+
+def test_select_choices_within_limit(question_with_choices):
+    choice1 = question_with_choices.choices[0]
+    choice2 = question_with_choices.choices[1]
+
+    selected_choices = question_with_choices.select_choices([choice1.id, choice2.id])
+
+    assert len(selected_choices) == 1
+    assert choice1.id in selected_choices
+
+def test_select_choices_exceeds_limit(question_with_choices):
+    choice1 = question_with_choices.choices[0] 
+    choice2 = question_with_choices.choices[1]  
+    choice3 = question_with_choices.choices[2]  
+
+    with pytest.raises(Exception, match="Cannot select more than 2 choices"):
+        question_with_choices.select_choices([choice1.id, choice2.id, choice3.id])
