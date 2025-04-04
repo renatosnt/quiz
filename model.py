@@ -15,7 +15,7 @@ class Choice:
         self.is_correct = is_correct
 
 class Question:
-
+    _choice_counter = 1
     def __init__(self, title: str, points: int=1, max_selections: int=1):
 
         if len(title) == 0:
@@ -49,6 +49,11 @@ class Question:
         if len(selected_choice_ids) > self.max_selections:
             raise Exception(f'Cannot select more than {self.max_selections} choices')
         
+        invalid_ids = [choice_id for choice_id in selected_choice_ids if choice_id not in self._choice_ids()]
+        if invalid_ids:
+            raise Exception(f'Invalid choice id(s) {", ".join(map(str, invalid_ids))}')
+    
+        
         return [selected_choice_id for selected_choice_id in selected_choice_ids if selected_choice_id in self._correct_choice_ids()]
     
     def set_correct_choices(self, correct_choice_ids: list[int]):
@@ -77,8 +82,7 @@ class Question:
             raise Exception(f'Invalid choice id {choice_id}')
 
     def _generate_choice_id(self) -> int:
-        if len(self.choices) == 0:
-            return 1
-        last_choice = self.choices[-1]
-        return last_choice.id + 1
+        choice_id = Question._choice_counter
+        Question._choice_counter += 1
+        return choice_id
         
